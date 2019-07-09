@@ -1,0 +1,6 @@
+youtube_dl
+imgurpython
+TinyTag
+chatterbot
+chatterbot_corpus
+apscheduler

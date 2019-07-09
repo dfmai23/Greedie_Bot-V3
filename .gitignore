@@ -1,0 +1,11 @@
+*.json
+*.pyc
+__pycache__
+*.exe
+*.dll
+lib/
+.idea/
+*.sqlite3
+
+data/
+red_setup_logs/
