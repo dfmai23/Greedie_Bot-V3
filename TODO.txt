@@ -1,0 +1,35 @@
+"""TODO:
+"""
+  implement coroutine inits, self.playlists, and self.states
+
+
+functionality
+————————————————————————————————————————————————————————————————————————————————————————————————————
+error checking in logs
+
+play url playlist as the new now playing list
+make bot rejoin its own vc
+
+check valid channel when setting post
+
+convert gifv's to gifs
+overwrite option when setting new gif
+
+restart watcher
+
+auto start async commands
+
+refactor
+————————————————————————————————————————————————————————————————————————————————————————————————————
+move startup checks to after joinig server so dont have to reload
+fix coroutine hang crash
+
+add to readme music player
+	give descriptions for bat files
+
+split config_path to path and file in music player
+
+time format into custom lib
+
+chatterbot
+text to speech - google assistant?

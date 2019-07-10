@@ -1,6 +1,5 @@
 import discord
 from redbot.core import commands
-import asyncio
 import aiohttp
 import os
 import copy
@@ -23,9 +22,9 @@ class Chat(commands.Cog):
         self.chatbot = None
         self.messages = {}
 
-    """————————————————————Initializations————————————————————"""
+    """————————————————————Chat Initializations————————————————————"""
     async def init(self):
-        print('[%s]----------Chat Bot Initialize Cog--------------------' % self.get_timefmt())
+        print('[%s]----------Chat Bot Initialize--------------------' % self.get_timefmt())
         self.bot.loop.create_task(self.init_chatbot())
         self.init_messages()
         self.bot.loop.create_task(self.init_training())
@@ -86,7 +85,7 @@ class Chat(commands.Cog):
             f.close()
 
     async def init_chatbot(self):
-        print('init_chatbot')
+        print('init_chatbot object')
         # database_fullpath = chat_path + 'chatdb.sqlite3'
         # print('  setting chatbot database as: ' + database_fullpath)
         self.chatbot = ChatBot(
@@ -135,7 +134,7 @@ class Chat(commands.Cog):
         if self.bot.user.mentioned_in(message):
             reply = self.parse(message)
             try:
-                await self.bot.send_message(message.channel, content=reply)
+                await message.channel.send(reply)
             except discord.HTTPException:
                 pass
 

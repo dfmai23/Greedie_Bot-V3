@@ -5,7 +5,12 @@ __pycache__
 *.dll
 lib/
 .idea/
+
 *.sqlite3
+*.sqlite3-*
+*.pickle
 
 data/
 red_setup_logs/
+
+venv/
