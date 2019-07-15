@@ -1,5 +1,5 @@
 import discord
-from redbot.core import commands
+from redbot.core import commands, checks
 import aiohttp
 import os
 import copy
@@ -139,6 +139,7 @@ class Chat(commands.Cog):
                 pass
 
     @commands.command()
+    @checks.admin()
     async def cstat(self, ctx):
         print('[%s]----------Chatbot STAT--------------------' % self.get_timefmt())
         for key in self.messages:

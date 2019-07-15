@@ -1,0 +1,104 @@
+https://regex101.com/
+
+music player
+————————————————————————————————————————————————————————————————————————————————————————————————————
+`dl https://www.youtube.com/watch?v=Iets6iLm3QY
+`add https://www.youtube.com/watch?v=Iets6iLm3QY
+`add https://soundcloud.com/else-official/else-zephyr
+
+https://www.youtube.com/playlist?list=PLDhaKHHWysX6MWeLFLqgsrhkq37SUCR8J
+https://www.youtube.com/playlist?list=PLvlw_ICcAI4eXKXNlcLacuXmPe5ydUl4N
+https://soundcloud.com/samurai_groove/sets/untouchables-v1
+https://newretrowave.bandcamp.com/album/magnatron-20
+
+copyright
+`add https://www.youtube.com/watch?v=sDJuFHZDo-A
+
+"data\music\cache\Thomas Vent - Listen To Your Heart-youtube-BLyVf1qeWR8.m4a"
+
+
+
+dailypost
+————————————————————————————————————————————————————————————————————————————————————————————————————
+`add_post 266047323166081024 test daily hello there
+
+
+gif
+————————————————————————————————————————————————————————————————————————————————————————————————————
+`add_gif test https://i.imgur.com/5k5X7Sr.gifv
+`add_gif test https://i.imgur.com/6n9fHDw.gif
+`add_gif awoo https://zippy.gfycat.com/OilyGrimyCobra.webm
+
+https://gfycat.com/oilygrimycobra
+https://zippy.gfycat.com/OilyGrimyCobra.webm
+https://i.imgur.com/6n9fHDw.gif
+https://i.imgur.com/5k5X7Sr.gifv
+https://i.imgur.com/5k5X7Sr.mp4
+https://giant.gfycat.com/UnlinedApprehensiveHarpyeagle.webm
+https://i.redd.it/bt7suru8mmt21.gif
+
+channel dev
+266047323166081024
+
+not working gif
+568127755179261961	
+working gif
+568127946477535233
+
+wallpaper
+————————————————————————————————————————————————————————————————————————————————————————————————————
+
+`reload dailywp
+`view_dbcats
+`set_cats Main Eva test
+
+SELECT name FROM main.CategoriesTbl ORDER BY sorting ASC LIMIT 0, 49999;
+
+SELECT id, name FROM main.CategoriesTbl WHERE name in (_WRC, _F1) LIKE ORDER BY sorting ASC LIMIT 0, 49999;
+SELECT id, name FROM main.CategoriesTbl WHERE name in (?, ?) ORDER BY sorting ASC LIMIT 0, 49999;
+csr.execute('SELECT id, name FROM main.CategoriesTbl '
+        'WHERE name in ({s}) '
+        'ORDER BY sorting ASC;'.format(s={','.join(['?']*len(server_cats))}))
+
+select id, CategoryId, Path, Filename from main.WallpapersTbl order by CategoryId asc limit 0, 49999;
+select id, CategoryId, Path, Filename from main.WallpapersTbl order by random() limit 1;
+
+
+
+//doesnt show cateogry name. uses subquery
+select wp.id, wp.CategoryId, wp.Path, wp.Filename 
+from main.WallpapersTbl wp
+where  wp.CategoryId = (
+	select cats.id
+	from main.CategoriesTbl cats
+	where cats.name in ('_WEC', '_WRC') 
+	order by random() 
+	)
+order by random() limit 1;
+
+//shows category name
+select wp.id, wp.CategoryId, wp.Path, wp.Filename, cats.name as CategoryName
+from main.WallpapersTbl wp
+inner join main.CategoriesTbl cats on cats.id = wp.CategoryId
+where cats.name in ('_WEC', '_WRC') 
+order by random() limit 1;
+
+
+['id', 'CategoryId', 'Path', 'Filename', 'CategoryName']
+(7, 3, 'D:\\Pictures', '872587634pXImgur.jpg', 'Main')
+
+CREATE TABLE "Posted" (
+	"id"	INTEGER PRIMARY KEY NOT NULL,
+	"pid"	INTEGER NOT NULL,
+	"catid"	INTEGER NOT NULL,
+	"CategoryName"	TEXT,
+	"Filepath"	INTEGER NOT NULL,
+	"Filename"	INTEGER NOT NULL,
+	"Posted"	INTEGER
+);
+
+
+SELECT "_rowid_",* FROM "main"."Posted" ORDER BY "id" ASC LIMIT 0, 49999;
+
+insert into main.Posted
+values (7, 3, 'Main', 'D:\\Pictures', '872587634pXImgur.jpg', 1)

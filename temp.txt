@@ -3,10 +3,14 @@ changes
 no need for import asyncio anymore
 self.session = aiohttp.ClientSession()
 
+class Class(commands.Cog):
+
 def cog_unload(self):
     self.session.detach()
 
 server.id changed to int
 guild = server
 @commands.command doesnrt require pass context
+new decorators
 all sends -> send
+
