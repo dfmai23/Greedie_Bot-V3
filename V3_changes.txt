@@ -46,8 +46,8 @@ ctx.guild.voice_client
 channel.voice_members
 channel.members
 
-create_ffmpeg_player -> FFmpegPCMAudio
+not more mp.isdone and is_paused() added
 
-not more mp.is_done and is_paused() added
+create_ffmpeg_player -> FFmpegPCMAudio
 
 https://stackoverflow.com/questions/56718658/how-to-check-if-bot-is-connected-to-a-channel-discord-py

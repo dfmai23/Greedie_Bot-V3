@@ -1,7 +1,6 @@
-"""TODO:
-"""
-  implement coroutine inits, self.playlists, and self.states
+redo setgame
 
+put watchers schedulers into console log
 
 functionality
 ————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -17,17 +16,13 @@ overwrite option when setting new gif
 
 restart watcher
 
-auto start async commands
-
 refactor
 ————————————————————————————————————————————————————————————————————————————————————————————————————
-move startup checks to after joinig server so dont have to reload
 fix coroutine hang crash
 
 add to readme music player
 	give descriptions for bat files
 
-split config_path to path and file in music player
 
 time format into custom lib
 

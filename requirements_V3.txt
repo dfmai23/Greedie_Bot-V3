@@ -4,3 +4,4 @@ TinyTag
 chatterbot
 chatterbot_corpus
 apscheduler
+pynacl

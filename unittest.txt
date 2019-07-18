@@ -5,6 +5,7 @@ music player
 `dl https://www.youtube.com/watch?v=Iets6iLm3QY
 `add https://www.youtube.com/watch?v=Iets6iLm3QY
 `add https://soundcloud.com/else-official/else-zephyr
+`play https://www.youtube.com/watch?v=62PO86rpOvQ
 
 https://www.youtube.com/playlist?list=PLDhaKHHWysX6MWeLFLqgsrhkq37SUCR8J
 https://www.youtube.com/playlist?list=PLvlw_ICcAI4eXKXNlcLacuXmPe5ydUl4N

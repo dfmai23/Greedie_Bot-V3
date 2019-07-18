@@ -190,9 +190,9 @@ class GIF(commands.Cog):
     @commands.command()
     async def view_gifs(self, ctx):
         """ List the embedded gifs """
+        print('[%s]----------VIEW GIFS--------------------' % self.get_timefmt())
         server = ctx.guild
 
-        print('[%s]----------VIEW GIFS--------------------' % self.get_timefmt())
         gifs = self.server_settings[server.id]["EMBEDDEDS"]
         gifs_display = []
         pp = pprint.PrettyPrinter(indent=4)
@@ -214,10 +214,10 @@ class GIF(commands.Cog):
     @commands.command()
     async def ginfo(self, ctx, link):
         """ DEBUG: post given gif info """
+        print("[%s]------------GIF INFO--------------------" % self.get_timefmt())
         server = ctx.guild
         channel = ctx.channel
 
-        print("[%s]------------GIF INFO--------------------" % self.get_timefmt())
         print('link: ' + link)
         embed = discord.Embed()
         embed.set_image(url=link)
@@ -231,7 +231,7 @@ class GIF(commands.Cog):
         print('dim: %s x %s' % (str(embed.image.height), str(embed.image.width)))
         print('thumbnail.url: ' + str(embed.thumbnail.url))
         print('video: ' + str(embed.video))
-        message = await self.bot.send_message(channel, embed=embed)
+        message = await self.channel.send(embed=embed)
         # message = await self.bot.send_message(channel, content=link)
         # message = await self.bot.get_message(channel, link)
 
