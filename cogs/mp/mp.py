@@ -374,7 +374,7 @@ class Music_Player(commands.Cog):
         -processes the playlist """
     def load_pl(self, server, playlist_name, **kwargs):          #** = forces keyword arg in caller
         server_cfg = self.server_settings[server.id]
-        print("server_cfg:" + str(server_cfg))
+        print("  server_cfg:" + str(server_cfg))
         playlist = Playlist(server.id, server_cfg["REPEAT"], server_cfg["SHUFFLE"])   #create empty playlist
         try:
             self.mp_stop(server)
@@ -385,6 +385,29 @@ class Music_Player(commands.Cog):
         if self.playlists[server.id] == None:
             return None
         # self.playlists[server.id].view()
+        return self.playlists[server.id]
+
+    async def load_url_pl(self, server, info, playlist):     #returns a list of Songs
+        url_playlist = []
+        base_url = info['webpage_url'].split('playlist?list=')[0]
+        for entry in info['entries']:
+            if entry:       #check deleted vids
+                try:        #check blocked vids
+                    if info['extractor_key'] == 'YoutubePlaylist':
+                        song_url = base_url + 'watch?v=%s' % entry['id']
+                    else:   #'SoundcloudSet', 'BandcampAlbum'
+                        song_url = entry['url']
+                    print('PROCESS DOWNLOAD')
+                    info = await self.downloader.extract(self.bot.loop, song_url, download=False)
+                    if info == None:
+                        continue
+                    #print(song_url)
+                    song_loc = music_cache_path + '\\' + info['title'] +'-'+ info['extractor'] +'-'+ info['id'] + '.' + info['ext']
+                    song = Song(info['title'], info['duration'], song_loc, info['webpage_url'])
+                    url_playlist.append(song)
+                except:
+                    pass
+        return url_playlist
 
 
     """————————————————————Commands Music Player————————————————————"""
@@ -406,7 +429,7 @@ class Music_Player(commands.Cog):
             self.mp_stop(server)
             self.mp_start(server, song)
             song_display = str(len(pl.list)-1) + ". " + song.display()
-            await ctx.send('playing song: ' + box(song_display))
+            await ctx.send('Playing song~: ' + box(song_display))
             return
 
         if len(pl.list) == 0:
@@ -437,7 +460,351 @@ class Music_Player(commands.Cog):
         self.mp_stop(server)
         await ctx.send("Stopping music!~")
 
+    @commands.command()
+    async def skip(self, ctx):
+        """ Skips current song """
+        server = ctx.guild
+        mp = self.get_mp(server)
+        pl = self.playlists[server.id]
+        self.mp_stop(server)
+
+        #get next song in playlist
+        next_song = await self.get_nxt_song(server)
+        if next_song == None:  #reached end of playlist
+            await ctx.send("Reached end of Playlist!~")
+            return
+        nxt_song_display = next_song.display()
+        self.mp_start(server, next_song)
+        await ctx.send('Playing next song!~\n' + box(nxt_song_display))
+        await self.check_nextnext_song(server)
+
+    @commands.command()
+    async def prev(self, ctx):
+        """Plays previous song"""
+        server = ctx.guild
+        mp = self.get_mp(server)
+        pl = self.playlists[server.id]
+        self.mp_stop(server)
+
+        prev_i = pl.order.index(pl.cur_i)
+        prev_song = pl.list[prev_i]
+        self.mp_start(server, prev_song)
+
+    @commands.command()
+    async def replay(self, ctx):
+        """Restarts current song"""
+        server = ctx.guild
+        mp = self.get_mp(server)
+        pl = self.playlists[server.id]
+        self.mp_stop(server)
+        self.mp_start(server, pl.list[pl.cur_i])
+
+    @commands.command()
+    async def volume(self, ctx, decimal=None):    #keyword decimal to display on help
+        """Set/Display volume between 0.0 and 1.0"""
+        server = ctx.guild
+        voice_client = ctx.guild.voice_client
+        mp = voice_client.music_player
+
+        if decimal==None:
+            await ctx.send("Volume is at " + str(mp.volume))
+            return
+
+        val = float(decimal)
+        if val > 1.0 or val < 0.0:
+            await ctx.send("Volume must be between 0 and 1.0!~")
+            return
+
+        if voice_client == None:
+            await ctx.send("Voice client not connected yet! Please join a voice channel and play music!~")
+            return
+        if not hasattr(voice_client, 'music_player'):
+            await ctx.send("Please play some music!")
+            return
+
+        mp.volume = val
+        self.server_settings[server.id]["VOLUME"] = val
+        await ctx.send("Music player volume set to:  " + str(val) + '~')
+
+    @commands.command()
+    async def status(self, ctx):
+        """Displays music player status"""
+        server = ctx.guild
+        state = self.states[server.id]
+        await ctx.send("Music Player is currently: " + state.value + '~')
+
+    @commands.command()
+    async def songinfo(self, ctx):
+        """ Displays current playing song info """
+        server = ctx.guild
+        pl = self.playlists[server.id]
+        song = pl.now_playing
+        songinfo = song.info()
+        await ctx.send(box(songinfo))
+
+
     """————————————————————Commands Playlist————————————————————"""
+    @commands.command()
+    async def add(self, ctx, *, song_or_url):   #*, = positional args as single str
+        """ Add a song (local or URL) to the playlist """
+        print('[%s]----------MP ADD--------------------' % self.get_timefmt())
+        await self.add_song(ctx, song_or_url)
+
+    """Adds a url playlist to the playlist
+        -if current playlist is empty, will load it as a new playlist  """
+    @commands.command()
+    async def add_playlist(self, ctx, url):
+        """Adds a url playlist to the playlist """
+        print('[%s]----------MP ADD_PLAYLIST--------------------' % self.get_timefmt())
+        server = ctx.guild
+        pl = self.playlists[server.id]
+
+        is_url = re.compile(r'^(?:http|ftp)s?://' # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+        r'localhost|' #localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)  # sub-path
+
+        if is_url.match(url):   #download or find in cache
+            print('PROCESS INFO ONLY')
+            info = await self.downloader.extract(self.bot.loop, url, download=False, process=False) #process=F less info, alot faster
+            if info['extractor_key'] in ['YoutubePlaylist', 'SoundcloudSet', 'BandcampAlbum']:
+                await ctx.send('Adding a playlist!~')
+                url_pl = await self.load_url_pl(server, info, pl)
+                for song in url_pl:
+                    pl.add(song)
+                await ctx.send('Playlist added!~')
+        else:
+            await ctx.send('Not a URL playlist!~')
+            return
+
+    @commands.command()
+    #@checks.mod_or_permissions(administrator=True)
+    async def remove(self, ctx, name_or_index):     #removes a song from playlist
+        """Removes song from playlist by index/searching song name"""
+        print('[%s]----------MP REMOVE--------------------' % self.get_timefmt())
+        server = ctx.guild
+        pl = self.playlists[server.id]
+        mp = self.get_mp(server)
+
+        result, song = pl.remove(name_or_index)
+        if result == 4:
+            await ctx.send("Couldn't find song in playlist!~")
+        elif result == 3:
+            await ctx.send("Playlist index not in range!~")
+        elif result == 2:
+            await ctx.send("Playlist now empty!")
+            mp.stop()
+        elif result == 1:
+            await ctx.send("Removed currently playing song! Playing next song~")
+            mp.stop()
+            mp.start(server, pl.cur_i)
+        else:
+            song_display = song.display()
+            await ctx.send("Removed from playlist!~\n" + box(song_display))
+
+    @commands.command()
+    async def search(self, ctx, *, searchterm):
+        """Searches a song on youtube and gets top result """
+        print('[%s]----------MP SEARCH--------------------' % self.get_timefmt())
+
+        server = ctx.guild
+        channel = ctx.channel
+        pl = self.playlists[server.id]
+
+        info = await self.downloader.extract(self.bot.loop, searchterm, download=False, process=False)
+        if info.get('url', '').startswith('ytsearch'):  # ytdl options allow us to use search strings as input urls
+            info = await self.downloader.extract(self.bot.loop, searchterm, download=False,process=True)
+            if not all(info.get('entries', [])):
+                await ctx.send('Couldnt find a song!~')
+                return
+            url = info['entries'][0]['webpage_url']    # TODO: handle 'webpage_url' being 'ytsearch:...' or extractor type
+            await self.add_song(ctx, url)
+        else:
+            await ctx.send('Couldn\'t search!~')    # *, = positional args as single str
+
+    @commands.command()
+    async def skipto(self, ctx, name_or_index):
+        """Skip playlist to index/song name"""
+        print('[%s]----------MP SKIPTO--------------------' % self.get_timefmt())
+        server = ctx.guild
+        pl = self.playlists[server.id]
+        mp = self.get_mp(server)
+
+        if name_or_index.isnumeric():
+            i = int(name_or_index) - 1
+            if (i + 1) > len(pl.list):
+                await ctx.send('Index out of range!~')
+                return
+        else:
+            searchterm = name_or_index
+            song = pl.search_song(searchterm)
+            if song is None:
+                await ctx.send("Song not found!~")
+                return
+            i = pl.get_i(song)
+
+        song = pl.list[i]
+        self.mp_stop(server)
+        self.mp_start(server, song)
+        song_display = str(i+1) + ". " + song.display()
+        await ctx.send('Jumping to song: ' + box(song_display))
+
+    @checks.admin()
+    @commands.command()
+    async def clear(self, ctx):
+        """Clears current playlist"""
+        server = ctx.guild
+        mp = self.get_mp(server)
+        pl = self.playlists[server.id]
+        self.mp_stop(server)
+        pl.clear()
+        await ctx.send("Cleared playlist!~")
+
+    @commands.command()
+    async def view(self, ctx):              #View current playlist
+        """Views current playlist"""
+        print('[%s]----------MP VIEW--------------------' % self.get_timefmt())
+        server = ctx.guild
+        pl = self.playlists[server.id]
+
+        if len(pl.list) == 0:
+            await ctx.send("Empty Playlist!~")
+            return
+        else:
+            cur_song, playlist, settings = pl.view()
+            settings = 'State: ' + self.states[server.id].value + '\t' + settings
+            await ctx.send( "Settings~\n" + box(settings) + '\n' +
+                                "Current Song~\n" + box(cur_song) + '\n' +
+                                "Current Playlist:\t%s\n" % italics(pl.title),
+                                delete_after=60)
+            for pl_section in playlist:
+                await ctx.send(box(pl_section))
+
+    @commands.command()
+    async def view_playlists(self, ctx, local=None):
+        """Views cached or local playlists """
+        server = ctx.guild
+        server_pl_path = playlist_path + '\\' + server.id
+        pl_cached = ''
+        pl_local = ''
+        pattern = r'\.(xml|wpl)$'
+
+        if local is None:
+            for root, dirs, files in os.walk(server_pl_path):
+                for name in files:
+                    pl_cached += re.split(pattern, name)[0] + '\n'
+            await ctx.send('Cached playlists:\n' + box(pl_cached))
+        elif local == 'local':
+            for root, dirs, files in os.walk(playlist_local_path):
+                for name in files:
+                    pl_local += re.split(pattern, name)[0] + '\n'
+            await ctx.send('Local playlists:\n' + box(pl_local))
+        else:
+            await ctx.send('Use "local" parameter to view local playlists!~')
+
+    @commands.command()
+    async def repeat(self, ctx, repeat_state=None):
+        """Set/display repeat"""
+        server = ctx.guild
+        pl = self.playlists[server.id]
+        repeat_display = None;
+        if not (repeat_state in {'on', 'off', '0', '1', 'one', None}):
+            await ctx.send('Parameter must be "on" or "off"!~')
+            return
+        elif repeat_state == 'on' or repeat_state == '1':
+            pl.repeat = True
+            repeat_display = 'on'
+        elif repeat_state == 'off'or repeat_state == '0':
+            pl.repeat = False
+            repeat_display = 'off'
+        elif repeat_state == 'one' :
+            pl.repeat = 'one'
+            repeat_display = 'repeating current song'
+        else: #display repeat status no params in command
+            #await ctx.send('Repeat is ' + ('on' if pl.repeat==True else 'off'))
+            await ctx.send('Repeat is ' + repeat_display)
+            return
+        pl.set_repeat()
+        await ctx.send("Repeat set to %s!~" % repeat_display)
+
+    @commands.command()
+    async def shuffle(self, ctx, onoff=None):
+        """Set/Display shuffle"""
+        server = ctx.guild
+        pl = self.playlists[server.id]
+        if not (onoff in {'on', 'off', None}):
+            await ctx.send('Parameter must be "on" or "off"!~')
+            return
+        elif onoff == 'on':
+            pl.shuffle = True
+        elif onoff == 'off':
+            pl.shuffle = False
+        else: #display shuffle status
+            await ctx.send('Shuffle is ' + ('on' if pl.shuffle==True else 'off'))
+            return
+        pl.set_shuffle()
+        await ctx.send("Shuffle set to %s!~" % onoff)
+
+    @commands.command()
+    async def save_playlist(self, ctx, *, playlist_name):       #builds own xml
+        """Saves current playlist to cache"""
+        print('[%s]----------MP SAVE PLAYLIST--------------------' % self.get_timefmt())
+        author = ctx.author
+        server = ctx.guild
+        pl = self.playlists[server.id]
+
+        pl_saved = pl.save(playlist_name, server, author.name)
+        if pl_saved == 1:
+            await ctx.send("Already have a playlist with same name! Overwrite? Y/N~")
+            reply = await self.bot.wait_for_message(author=author, channel=ctx.message.channel, check=self.check_reply)
+            if reply.content in ['yes', 'y', 'Y']:
+                pl_saved = pl.save(playlist_name, server, author.name, overwrite=1)
+            elif reply.content in ['no', 'n', 'N']:   #reply=0
+                await ctx.send('Playlist not saved!~')
+                return
+        await ctx.send("Saved playlist: %s!~" % playlist_name)
+
+    @commands.command()
+    async def load_playlist(self, ctx, pl):
+        """Loads the specified playlist"""
+        print('[%s]----------MP LOAD PLAYLIST--------------------' % self.get_timefmt())
+        server = ctx.guild
+        await ctx.send("Loading playlist please wait!~")
+        pl_loaded = self.load_pl(server, pl)
+        if pl_loaded == None:
+            await ctx.send("Can't find playlist to load!~")
+            return
+        #self.mp_reload(server)
+        self.mp_stop(server)
+        self.mp_start(server, self.playlists[server.id].list[0])    #autoplay
+
+    @commands.command()
+    async def delete_playlist(self, ctx, *, pl_name):        #deletes by playlist filename bar ext
+        """Deletes the specified playlist"""
+        print('[%s]----------MP DELETE PLAYLIST--------------------' % self.get_timefmt())
+        server = ctx.guild
+        pl_path = playlist_path + '\\' + server.id
+
+        ftype = 'xml'
+        pl_loc = self.get_file(pl_name, pl_path, ftype)
+        if pl_loc == None:
+            await ctx.send ("Can't find playlist to delete!~")
+        else:
+            os.remove(pl_loc)
+            await ctx.send ("Deleted playlist: %s!~" % pl_name)
+
+    @checks.admin()
+    @commands.command()
+    async def save_mp(self, ctx):
+        """ Save config and playlists for current server """
+        print('[%s]----------MP SAVE--------------------' % self.get_timefmt())
+        server = ctx.guild
+        print('saving music player settings and playlist:', server.id, server.name)
+        pl = self.playlists[server.id]
+        pl.save(default_playlist, server, overwrite=1)
+        self.save_config()
 
 
     """————————————————————Commands Server————————————————————"""

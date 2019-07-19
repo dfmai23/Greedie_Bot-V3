@@ -95,7 +95,7 @@ class Playlist:
         playlist = []
         temp_playlist = ""
 
-        print("----------FN playlist.py view()----------")
+        print("----------FN playlist.view()----------")
         print('playlist name: ' + self.title)
         print("playlist length: " + str(len(self.list)))
         print('repeat: %s  shuffle: %s' % (self.repeat, self.shuffle))

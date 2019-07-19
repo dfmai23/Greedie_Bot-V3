@@ -1,6 +1,9 @@
 ctx.message.server
 ctx.guild
 
+ctx.message.channel
+ctx.channel
+
 ctx.message.author
 ctx.author
 
@@ -10,7 +13,8 @@ author.voice.channel
 FFMPEG_FILES
 FFMPEG_BUILDS_URL
 
-changes
+@commands.command(pass_context=True)
+@commands.command(
 
 no need for import asyncio anymore
 
