@@ -505,10 +505,10 @@ class Music_Player(commands.Cog):
         """Set/Display volume between 0.0 and 1.0"""
         server = ctx.guild
         voice_client = ctx.guild.voice_client
-        mp = voice_client.music_player
+        mp = voice_client
 
         if decimal==None:
-            await ctx.send("Volume is at " + str(mp.volume))
+            await ctx.send("Volume is at " + str(mp.source.volume))
             return
 
         val = float(decimal)
@@ -516,14 +516,15 @@ class Music_Player(commands.Cog):
             await ctx.send("Volume must be between 0 and 1.0!~")
             return
 
-        if voice_client == None:
+        if not voice_client.is_connected():
             await ctx.send("Voice client not connected yet! Please join a voice channel and play music!~")
             return
-        if not hasattr(voice_client, 'music_player'):
-            await ctx.send("Please play some music!")
-            return
+        # from v2 bot
+        # if not hasattr(voice_client, 'music_player'):
+        #     await ctx.send("Please play some music!")
+        #     return
 
-        mp.volume = val
+        mp.source.volume = val
         self.server_settings[server.id]["VOLUME"] = val
         await ctx.send("Music player volume set to:  " + str(val) + '~')
 
