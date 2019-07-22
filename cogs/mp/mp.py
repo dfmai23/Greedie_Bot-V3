@@ -173,7 +173,8 @@ class Music_Player(commands.Cog):
         # pl = self.playlists[server.id]
         # print(mp.is_playing(), self.states[server.id])
         try:
-            if not mp.is_playing() and self.states[server.id] != State.STOPPED:    #stopped playing music
+            if not mp.is_playing() and \
+                    self.states[server.id] != State.STOPPED and self.states[server.id] != State.PAUSED:    #stopped playing music
                 print('[%s]----------WATCHER: playlist manager--------------------' % self.get_timefmt())
                 print('audio has stopped, playing next song')
                 print(server.id, server.name)
@@ -253,8 +254,8 @@ class Music_Player(commands.Cog):
         #if index==None: song = pl.list[pl.cur_i]
         #else: song = pl.list[index]
         song = pl.list[0]
-        self.mp_start(server, song)
-        self.mp_pause(server)       #restarts music player in a robust fashion to first song in playlist
+        self.mp_start(server, song)     #restarts music player in a robust fashion to first song in playlist
+        # self.mp_pause(server)         #testing
 
     def get_mp(self, server):             #get music player of current server
         music_player = server.voice_client
@@ -420,7 +421,7 @@ class Music_Player(commands.Cog):
         pl = self.playlists[server.id]
         mp = self.get_mp(server)
 
-        print("song_or_url: " + 'None' if song_or_url is None else song_or_url)
+        print("song_or_url: " + 'None, attempting to play/resume' if song_or_url is None else song_or_url)
         if song_or_url is not None:
             tasks = [self.add_song(ctx, song_or_url)]   # running it synchronously,
             await asyncio.wait(tasks)                   #can also do with loop.run_until_complete???
@@ -918,7 +919,7 @@ class Music_Player(commands.Cog):
         print(state_msg)
         print('  class:', self.states[server.id].value)
 
-        print('server info')
+        print('server settings')
         for key, val in self.server_settings[server.id].items():
             print(' ', key, val)
 

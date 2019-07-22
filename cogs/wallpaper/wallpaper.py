@@ -291,7 +291,7 @@ class Wallpaper(commands.Cog):
         get the image location and post
         save the image location to writable db and mark as posted
     """
-    # @checks.admin()
+    @checks.admin()
     @commands.command()
     async def post_wp(self, ctx):  # *args = positional only varargs
         """ Posts a wallpaper """
@@ -426,7 +426,8 @@ class Wallpaper(commands.Cog):
         return csr.fetchall()
 
     def get_read_image(self, csr_read, server_cats):
-        # FIND categories WHERE IN to ones in json, pick random image in any category
+        print('----------get_read_image----------')
+        # FIND categories WHERE IN the ones in json cats, pick random image in any category
         sqlex = '''SELECT id, name
                     FROM main.CategoriesTbl
                     WHERE name in ({s})
@@ -453,11 +454,12 @@ class Wallpaper(commands.Cog):
         return row
 
     def get_writeread_image(self, csr_write, row):  #db row from get_read_image, readDB
-        #FIND image where EQUAL to one found in readDB
+        print('----------get_writeread_image----------')
+        #FIND image in writeDB where EQUAL to one found in readDB
         sql_writeread = '''select * from main.Posted
                             where pid = (?)'''
 
-        csr_write.execute(sql_writeread, (row[0],)) #exc requires it to be a sequence (x,)
+        csr_write.execute(sql_writeread, (row[0],)) #exec requires it to be a sequence (x,)
         checkrow = csr_write.fetchone()
         print('checkrow type: ' + str(type(checkrow)))
         # print(checkrow[0], checkrow[1], checkrow[2], checkrow[3], checkrow[4], checkrow[5])
@@ -469,6 +471,7 @@ class Wallpaper(commands.Cog):
         return checkrow
 
     def insert_image(self, csr_write, row):     # write to db
+        print('----------insert_image----------')
         # cols: image id, ???, cat id, path, file, ???, 1, date posted
         sql_write = '''insert into main.Posted
                         values (NULL, ?, ?, ?, ?, ?, ?, ?)'''

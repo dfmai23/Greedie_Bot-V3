@@ -10,7 +10,7 @@ default_cfg = {
             "SHUFFLE": False,
             "VOTE_RATIO": 0.5,
             "VOTES_REQUIRED": 3,
-            "SAVE_PLAYLISTS`": True,
+            "SAVE_PLAYLISTS": True,
     },
     "SERVER_SETTINGS": {}
 }
