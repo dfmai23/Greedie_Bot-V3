@@ -1,7 +1,5 @@
 redo setgame
 
-put watchers schedulers into console log
-
 load playlist to do urls too
 add playlist to do local playlists
 

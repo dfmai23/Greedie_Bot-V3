@@ -115,7 +115,7 @@ class Wallpaper(commands.Cog):
     def save_config(self):  # save config for current server
         cfg_file = open(config_path + config_file, 'w')
         json.dump(self.settings, cfg_file, indent=4)
-        print('Saving WallpaperBot config')
+        print('saving WallpaperBot config')
 
     def get_timefmt(self):
         return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -127,7 +127,7 @@ class Wallpaper(commands.Cog):
     async def set_wpchannel(self, ctx, channel_id):
         """ Set the channel to schedule posts to """
         server = ctx.guild
-        channel = server.get_channel(channel_id)
+        channel = server.get_channel(int(channel_id))
 
         print('[%s]----------WP SET CHANNEL--------------------' % self.get_timefmt())
         print("channel: %s  type: %s " % (channel.id, str(type(channel.id))))
@@ -151,7 +151,7 @@ class Wallpaper(commands.Cog):
         self.save_config()
         await ctx.send("Assigned time: %s to post daily wallpapers!~" % str(newtime))
 
-    @commands.command
+    @commands.command()
     async def add_cats(self, ctx, *cats):
         """ Add the categories to pull pictures from """
         print('[%s]----------WP ADD CATS--------------------' % self.get_timefmt())
@@ -191,8 +191,9 @@ class Wallpaper(commands.Cog):
         print('ADDCATS_NEW: ' + str(cats_new))
         print('ADDCATS: ' + str(addcats))
         print('CATS_NOTFOUND: ' + str(cats_notfound))
-        print('CATS_ALREADYFOUND: ', str(cats_alreadyfound), '\n')
+        print('CATS_ALREADYFOUND: ', str(cats_alreadyfound))
 
+        self.save_config()
         if len(cats_notfound) > 0:
             await ctx.send('The following categories were not found and not added!~: ' + box(', '.join(cats_notfound)))
         if len(cats_alreadyfound) > 0:
@@ -202,7 +203,7 @@ class Wallpaper(commands.Cog):
         await ctx.send('The following categories now selected!~: ' + box(', '.join(addcats)))
         conn.close()
 
-    @commands.command
+    @commands.command()
     async def remove_cats(self, ctx, *cats):
         """ Remove the selected categories that pictures are pulled from """
         print('[%s]----------WP REMOVE CATS--------------------' % self.get_timefmt())
@@ -231,13 +232,16 @@ class Wallpaper(commands.Cog):
         print('CATS_OLD: ' + str(cats_old))
         print('CATS_NOTFOUND: ' + str(cats_notfound))
         print('CATS_REMOVED: ' + str(cats_removed))
+
+        self.save_config()
         if len(cats_notfound) > 0:
             await ctx.send('The following categories were not found and not removed!~: ' + box(', '.join(cats_notfound)))
         if len(cats_removed) > 0:
             await ctx.send('The following categories were removed!~: ' + box(', '.join(cats_removed)))
         await ctx.send('The following categories now selected!~: ' + box(', '.join(self.server_settings[server.id]["CATEGORIES"])))
 
-    @commands.command
+
+    @commands.command()
     async def view_cats(self, ctx, cat_src=None):  #whether viewing categories from db or selected ones to pull from
         """ List the selected categories to pull pictures from or DB to choose from"""
         server = ctx.guild
@@ -296,8 +300,9 @@ class Wallpaper(commands.Cog):
     async def post_wp(self, ctx):  # *args = positional only varargs
         """ Posts a wallpaper """
         server = ctx.guild
-        channel_id = self.server_settings[server.id]["CHANNEL"]
-        channel = server.get_channel(channel_id)
+        channel = ctx.channel
+        # channel_id = self.server_settings[server.id]["CHANNEL"] #for actual auto post
+        # channel = server.get_channel(int(channel_id))
 
         print('[%s]----------WP POST--------------------' % self.get_timefmt())
         print("posting to:")
@@ -336,9 +341,10 @@ class Wallpaper(commands.Cog):
             self.insert_image(csr_write, row)  # write image to writeDB
 
             filepath = row[2] + '\\' + row[3]
+            file = discord.File(filepath)
             print('filepath: ' + filepath)
-            await channel.send(channel, file=filepath)
-            print('posted image: ' + filepath)
+            await channel.send(channel, file=file)
+            print('posted image from filepath, success')
 
             # close connections
             conn_write.commit()
@@ -362,7 +368,7 @@ class Wallpaper(commands.Cog):
 
     async def post_auto(self, server):
         channel_id = self.server_settings[server.id]["CHANNEL"]
-        channel = server.get_channel(channel_id)
+        channel = server.get_channel(int(channel_id))
 
         print("[%s]----------WP AUTO POST--------------------" % self.get_timefmt())
         print("posting to:")
@@ -401,9 +407,10 @@ class Wallpaper(commands.Cog):
             self.insert_image(csr_write, row)  # write image to writeDB
 
             filepath = row[2] + '\\' + row[3]
+            file = discord.File(filepath)
             print('filepath: ' + filepath)
-            await channel.send(channel, file=filepath)
-            print('posted image: ' + filepath)
+            await channel.send(channel, file=file)
+            print('posted image from filepath, success')
 
             # close connections
             conn_write.commit()
@@ -442,12 +449,14 @@ class Wallpaper(commands.Cog):
                     order by random() limit 1';'''. \
                     format(s={', '.join('?' * len(server_cats))}). \
                     replace('{', '').replace('}', '').replace('\'', '')
-                    # print(sql)
+        #format s to account for multiple cats
+        # print(sql_read)
+        # print(server_cats)
         csr_read.execute(sql_read, server_cats)
 
         # rows = csr_read.fetchall()
         # for row in rows:
-        #     print(row)
+        #    print(row)
         row = csr_read.fetchone()  # fetchall and fetch both still return a tuple for Row object
         print('read db, columns  : ' + str(row.keys()))
         print('read db, retrieved: ' + str(list(row)))
@@ -480,7 +489,7 @@ class Wallpaper(commands.Cog):
         writerow.insert(2, row[4])
         writerow.pop()
         writerow.append(1)  # moves cat to middle and adds 1 to new col at eol
-        writerow.append(datetime.date.today())  #date posted
+        writerow.append(datetime.datetime.now().isoformat(' ', 'seconds'))  #dt posted, second level precision
         print('writerow: ' + str(writerow))
         csr_write.execute(sql_write, writerow)
 

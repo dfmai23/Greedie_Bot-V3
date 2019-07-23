@@ -279,6 +279,7 @@ class Music_Player(commands.Cog):
         if is_url.match(song_or_url):   #download or find in cache
             url = song_or_url
             info = await self.downloader.extract(self.bot.loop, url, download=False, process=False)    #get info only
+            # print(info)
             if info['extractor_key'] in ['YoutubePlaylist', 'SoundcloudSet', 'BandcampAlbum']:
                 await ctx.send('Please use "add_p" command for URL playlists!')
                 return
@@ -421,7 +422,7 @@ class Music_Player(commands.Cog):
         pl = self.playlists[server.id]
         mp = self.get_mp(server)
 
-        print("song_or_url: " + 'None, attempting to play/resume' if song_or_url is None else song_or_url)
+        print("input song_or_url: " + 'None, attempting to play/resume' if song_or_url is None else song_or_url)
         if song_or_url is not None:
             tasks = [self.add_song(ctx, song_or_url)]   # running it synchronously,
             await asyncio.wait(tasks)                   #can also do with loop.run_until_complete???
@@ -864,18 +865,19 @@ class Music_Player(commands.Cog):
         print('[%s]----------PLAYLIST URL INFO--------------------' % self.get_timefmt())
         server = ctx.guild
         info = await self.downloader.extract(self.bot.loop, url, download=False)
+        print(info)
         if info != None:
             for key in info:
-                if key == 'formats':
-                    print(key, info[key])
-                    continue
+                # if key == 'formats':
+                #     print(key, info[key])
+                #     continue
                 """
                 if key == 'entries':
                     for entry in info['entries']:
                         for key2 in entry:
                             print(key2, entry[key2])
                 """
-                print(key, info[key])
+                # print(key, ':', info[key])
                 """
                 if key == 'formats':
                     ext = info[key][0]['ext']   #multiple m4a links, 0=pull first one
@@ -931,4 +933,4 @@ class Music_Player(commands.Cog):
         print('saving music player config for servers')
 
     def get_timefmt(self):
-        return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())

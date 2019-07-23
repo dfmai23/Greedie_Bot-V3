@@ -146,3 +146,4 @@ media_player.source = discord.PCMVolumeTransformer(media_player.source)
 media_player.source.volume = self.server_settings[server.id]["VOLUME"]
 
 https://stackoverflow.com/questions/56718658/how-to-check-if-bot-is-connected-to-a-channel-discord-py
+
