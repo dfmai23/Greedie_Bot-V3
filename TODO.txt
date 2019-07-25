@@ -2,6 +2,7 @@ redo setgame
 
 load playlist to do urls too
 add playlist to do local playlists
+update interactive text
 
 functionality
 ————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -13,8 +14,6 @@ check valid channel when setting post
 
 convert gifv's to gifs
 overwrite option when setting new gif
-
-restart watcher
 
 refactor
 ————————————————————————————————————————————————————————————————————————————————————————————————————

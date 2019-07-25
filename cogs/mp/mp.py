@@ -812,6 +812,16 @@ class Music_Player(commands.Cog):
         self.save_config()
 
 
+    """————————————————————Helper Fn's————————————————————"""
+    def save_config(self):      #save config for current server
+        config_loc_write = open(config_loc, 'w')
+        json.dump(self.settings, config_loc_write, indent=4) #in:self.settings, out:config_file
+        print('saving music player config for servers')
+
+    def get_timefmt(self):
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+
     """————————————————————Commands Server————————————————————"""
     @checks.admin()
     @commands.command()
@@ -928,11 +938,3 @@ class Music_Player(commands.Cog):
         for key, val in self.server_settings[server.id].items():
             print(' ', key, val)
 
-    """————————————————————Helper Fn's————————————————————"""
-    def save_config(self):      #save config for current server
-        config_loc_write = open(config_loc, 'w')
-        json.dump(self.settings, config_loc_write, indent=4) #in:self.settings, out:config_file
-        print('saving music player config for servers')
-
-    def get_timefmt(self):
-        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
