@@ -400,10 +400,12 @@ class Music_Player(commands.Cog):
                     else:   #'SoundcloudSet', 'BandcampAlbum'
                         song_url = entry['url']
                     print('PROCESS DOWNLOAD')
-                    info = await self.downloader.extract(self.bot.loop, song_url, download=False)
+                    info = await self.downloader.extract(self.bot.loop, song_url, download=True)
                     if info == None:
                         continue
                     #print(song_url)
+                    pattern = r'\<|\>|\:|\"|\/|\\|\||\?|\*'
+                    info['title'] = re.sub(pattern, '_', info['title'])
                     song_loc = music_cache_path + '\\' + info['title'] +'-'+ info['extractor'] +'-'+ info['id'] + '.' + info['ext']
                     song = Song(info['title'], info['duration'], song_loc, info['webpage_url'])
                     url_playlist.append(song)
@@ -860,8 +862,8 @@ class Music_Player(commands.Cog):
 
     @checks.admin()
     @commands.command()
-    async def pinfo(self, ctx, url):
-        """ DEBUG: playlist URL info debug"""
+    async def psinfo(self, ctx, url):
+        """ DEBUG: playlist URL or song info debug"""
         print('[%s]----------PLAYLIST URL INFO--------------------' % self.get_timefmt())
         server = ctx.guild
         info = await self.downloader.extract(self.bot.loop, url, download=False)

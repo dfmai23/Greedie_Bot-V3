@@ -22,7 +22,7 @@ class Logger(object):
 
 ydl_options = {
     'source_address': '0.0.0.0',
-    'format': '139/bestaudio/best', #priority 139=lightweight m4a
+    'format': '140/bestaudio/best', #priority 140=lightweight m4a
     'extractaudio': True,
     #'audioformat': "mp3",
     #'restrictfilenames': True,
