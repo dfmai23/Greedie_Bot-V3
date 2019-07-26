@@ -173,6 +173,7 @@ class GIF(commands.Cog):
         server = ctx.guild
         channel = ctx.channel
 
+        print('[%s]----------GIF--------------------' % self.get_timefmt())
         gifs = self.server_settings[server.id]["EMBEDDEDS"]
         if gifname not in gifs:
             await ctx.send('Could not find gif!~')
