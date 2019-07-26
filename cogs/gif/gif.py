@@ -176,6 +176,7 @@ class GIF(commands.Cog):
         print('[%s]----------GIF--------------------' % self.get_timefmt())
         gifs = self.server_settings[server.id]["EMBEDDEDS"]
         if gifname not in gifs:
+            print('could not find gif')
             await ctx.send('Could not find gif!~')
             return
         link = gifs[gifname]
