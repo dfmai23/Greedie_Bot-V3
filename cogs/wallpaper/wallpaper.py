@@ -95,7 +95,7 @@ class Wallpaper(commands.Cog):
             print("scheduling server: %s %s" % (server.id, server.name))
             post_time = self.server_settings[server.id]["TIME_POST"]
             time = datetime.datetime.strptime(post_time, '%H:%M')  # strip using datetime
-            # scheduler.add_job(self.post_auto, 'cron', [server], hour=time.hour, minute=time.minute)
+            scheduler.add_job(self.post_auto, 'cron', [server], hour=time.hour, minute=time.minute)
             # scheduler.add_job(self.wpstat, 'interval', [server], seconds=60) #for testing
         scheduler.start()
 
@@ -409,7 +409,7 @@ class Wallpaper(commands.Cog):
             filepath = row[2] + '\\' + row[3]
             file = discord.File(filepath)
             print('filepath: ' + filepath)
-            await channel.send(channel, file=file)
+            await channel.send(file=file)
             print('posted image from filepath, success')
 
             # close connections
