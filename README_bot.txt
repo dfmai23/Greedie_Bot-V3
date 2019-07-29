@@ -1,5 +1,3 @@
-
-
 setup for cogs
 —————————————————————————————————————————————————————————————————————————————
 venv
@@ -31,27 +29,25 @@ use official RedBot package seperately from my cog repo
 !installpath D:\Documents\Code\python\Greedie_Bot-V3\cogs
 
 
-
-
-
-
 v3 docs
 ————————————————————————————————————————————————————————————————————————————————————————————————————
 https://discordpy.readthedocs.io/en/v1.2.3/index.html
 https://github.com/Rapptz/discord.py/tree/master
 https://red-discordbot.readthedocs.io/en/v3-develop/index.html
+https://github.com/Rapptz/discord.py
 
 
-music player
+cogs docs
 ————————————————————————————————————————————————————————————————————————————————————————————————————
+music player
+————————————————————————————————————
 https://github.com/rcbyron/hey-athena-client
 https://ffmpeg.org/ffmpeg.html
 https://github.com/rg3/youtube-dl/blob/master/README.md#readme
 
 
-
 wallpaper
-————————————————————————————————————————————————————————————————————————————————————————————————————
+————————————————————————————————————
 https://apscheduler.readthedocs.io/en/v3.6.0/faq.html
 https://stackoverflow.com/questions/51530012/how-can-i-run-an-async-function-using-the-schedule-library
 https://stackoverflow.com/questions/11523918/python-start-a-function-at-given-time
@@ -76,11 +72,11 @@ set_wpchannel [channel_id]
 add_cats	[cats]
 set_time optional
 
+
 chatterbot
-————————————————————————————————————————————————————————————————————————————————————————————————————
+————————————————————————————————————
 https://github.com/gunthercox/ChatterBot
 https://chatterbot.readthedocs.io/en/stable/utils.html
-
 
 
 changes from v2
