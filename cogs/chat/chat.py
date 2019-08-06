@@ -153,13 +153,13 @@ class Chat(commands.Cog):
             print('contains @everyone, skipping message')
             return
 
-        pattern = re.compile(r'^(<@\d*>|@everyone)')
+        pattern = re.compile(r'^<@\d*>')
         content = re.sub(pattern, '', message.content)  # remove the ping @bot from message before parse
         reply = self.chatbot.get_response(content)
 
         print('message content: ' + message.content)
         print('editted content: ' + content)
-        print('REPLY', message.content, '|', reply)
+        print('reply          : ' + reply)
         return reply
 
     def parse2(self, server, message):  #from txt file
