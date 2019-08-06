@@ -343,7 +343,7 @@ class Wallpaper(commands.Cog):
             filepath = row[2] + '\\' + row[3]
             file = discord.File(filepath)
             print('filepath: ' + filepath)
-            await channel.send(channel, file=file)
+            await channel.send(file=file)
             print('posted image from filepath, success')
 
             # close connections
