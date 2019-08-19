@@ -2,7 +2,7 @@ setup for cogs
 —————————————————————————————————————————————————————————————————————————————
 venv
 ————————————————————————————————————
-py -3.7 -m venv D:\Documents\Code\python\venv
+py -3.7 -m venv D:\Documents\Code\python\Greedie_Bot-V3\venv
 //activate venv
 D:\Documents\Code\python\venv\Scripts\activate.bat
 
