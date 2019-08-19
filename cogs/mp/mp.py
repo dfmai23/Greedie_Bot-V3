@@ -51,6 +51,8 @@ class Music_Player(commands.Cog):
         self.bot.add_listener(self.shutdown_watcher, 'on_message')  #watcher no log on init
         self.bot.loop.create_task(self.playlist_scheduler())        #schedule->manager no log on init
         self.bot.loop.create_task(self.voice_channel_watcher())
+        self.bot.loop.create_task(self.init_autojoin())
+
         print('starting Music Player with codec: ' + self.codec)
 
     def cog_unload(self):
@@ -99,7 +101,7 @@ class Music_Player(commands.Cog):
             self.games[server.id] = None
 
     async def init_autojoin(self):
-        print('\nmedia player autojoining Channels')
+        print('media player autojoining Channels')
         # for cid in self.settings["AUTOJOIN_CHANNELS"]:
         #     print("channels: " + cid)
         # print("autojoin: " + str(self.settings["AUTOJOIN"]))
@@ -109,7 +111,7 @@ class Music_Player(commands.Cog):
                 channel= self.bot.get_channel(c_id) #channel to join
                 server = channel.guild
                 try:
-                    voice_client = channel.connect()
+                    voice_client = await channel.connect()
                     print("voice client: " + voice_client.user.name)
                     print('  joining channel:', server.id, server.name, ', ', channel.id, channel.name)
                     #await self.bot.send_message('Hi!~')
