@@ -891,7 +891,7 @@ class Music_Player(commands.Cog):
                         for key2 in entry:
                             print(key2, entry[key2])
                 """
-                # print(key, ':', info[key])
+                print(key, ':', info[key])
                 """
                 if key == 'formats':
                     ext = info[key][0]['ext']   #multiple m4a links, 0=pull first one
