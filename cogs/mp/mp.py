@@ -761,16 +761,19 @@ class Music_Player(commands.Cog):
         """Saves current playlist to cache"""
         print('[%s]----------MP SAVE PLAYLIST--------------------' % self.get_timefmt())
         author = ctx.author
+        channel = ctx.channel
         server = ctx.guild
         pl = self.playlists[server.id]
 
         pl_saved = pl.save(playlist_name, server, author.name)
         if pl_saved == 1:
+            def check_reply(reply):
+                return reply.author == author and reply.channel == channel
             await ctx.send("Already have a playlist with same name! Overwrite? Y/N~")
-            reply = await self.bot.wait_for_message(author=author, channel=ctx.message.channel, check=self.check_reply)
-            if reply.content in ['yes', 'y', 'Y']:
+            reply = await self.bot.wait_for('message', check=check_reply)
+            if reply.content.lower() in ['yes', 'y']:
                 pl_saved = pl.save(playlist_name, server, author.name, overwrite=1)
-            elif reply.content in ['no', 'n', 'N']:   #reply=0
+            elif reply.content.lower() in ['no', 'n']:
                 await ctx.send('Playlist not saved!~')
                 return
         await ctx.send("Saved playlist: %s!~" % playlist_name)
@@ -817,6 +820,7 @@ class Music_Player(commands.Cog):
 
 
     """————————————————————Helper Fn's————————————————————"""
+
     def save_config(self):      #save config for current server
         config_loc_write = open(config_loc, 'w')
         json.dump(self.settings, config_loc_write, indent=4) #in:self.settings, out:config_file
