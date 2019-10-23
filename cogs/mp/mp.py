@@ -286,9 +286,11 @@ class Music_Player(commands.Cog):
                 await ctx.send('Please use "add_p" command for URL playlists!')
                 return
             info = await self.downloader.extract(self.bot.loop, url)    #get info and download song
+
             pattern = r'\<|\>|\:|\"|\/|\\|\||\?|\*'
+            #print("orig title: " + info['title'])
             info['title'] = re.sub(pattern, '_', info['title'])
-            print(info['title'])
+            print("re.sub title: " + info['title'])
             song_loc = music_cache_path + '\\' + info['title'] +'-'+ info['extractor'] +'-'+ info['id'] + '.' + info['ext']
             song = Song(info['title'], info['duration'], song_loc, info['webpage_url'])
         else:    #find local file in library
@@ -842,7 +844,8 @@ class Music_Player(commands.Cog):
                 return
             await voice_client.disconnect()
 
-        print('joining voice channel:', channel.id, channel.name)
+        print('joining  server: ', server.id, server.name)
+        print('voice channel:   ', channel.id, channel.name)
         await channel.connect()          #joins owners voice channel only
         self.mp_reload(server)
 
@@ -879,7 +882,7 @@ class Music_Player(commands.Cog):
         print('[%s]----------PLAYLIST URL INFO--------------------' % self.get_timefmt())
         server = ctx.guild
         info = await self.downloader.extract(self.bot.loop, url, download=False)
-        print(info)
+        #print(info)
         if info != None:
             for key in info:
                 # if key == 'formats':
@@ -891,13 +894,12 @@ class Music_Player(commands.Cog):
                         for key2 in entry:
                             print(key2, entry[key2])
                 """
-                print(key, ':', info[key])
-                """
                 if key == 'formats':
                     ext = info[key][0]['ext']   #multiple m4a links, 0=pull first one
                     url = info[key][0]['url']
                     print(ext, url)
-                """
+                    continue
+                print(key, ':', info[key])
         else:
             print('not able to get playlist info')
 
